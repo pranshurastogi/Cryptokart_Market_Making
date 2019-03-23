@@ -52,9 +52,8 @@ CK_url = "https://test.cryptokart.io:1337/"                # Change this URL to 
 # A random integer will be taken b/w lower bound and upper bound and then it is divided with amt_minimiser
 #Example for the range of LB and UB -> 2and 20 and amt_minimizer 400 
 # the range will be 2/400 and 20/400 -> 0.005 and 0.05[Amount will be between these two]
-lower_bound_amt = 2
-upper_bound_amt = 20
-amt_minimiser = 400
+lower_bound_amt = 0.5
+upper_bound_amt = 0.005
 
 
 # Quantity Round OFF integer
@@ -163,7 +162,7 @@ def Cancel_Order(client_id,client_secret,market_name,order_id):
 def Bulk_Buy_Order(No_of_Orders,arg1_qty_int,arg2_qty_int,arg1_Price_int,arg2_Price_int,market_name):
     for i in range(No_of_Orders):
         random_qty_int = random.uniform(arg1_qty_int,arg2_qty_int)
-        random_qty = str(round((random_qty_int/amt_minimiser),Qty_RoundOff))
+        random_qty = str(round((random_qty_int),Qty_RoundOff))
         random_price = round((random.uniform(arg1_Price_int,arg2_Price_int)),Price_RoundOff)
         random_price_str = str(random_price)
         Order_placement = FireOrder_Limit(client_id,client_secret,market_name,2,random_qty,random_price_str)
@@ -172,7 +171,7 @@ def Bulk_Buy_Order(No_of_Orders,arg1_qty_int,arg2_qty_int,arg1_Price_int,arg2_Pr
 def Bulk_Sell_Order(No_of_Orders,arg1_qty_int,arg2_qty_int,arg1_Price_int,arg2_Price_int,market_name):
     for i in range(No_of_Orders):
         random_qty_int = random.uniform(arg1_qty_int,arg2_qty_int)
-        random_qty = str(round((random_qty_int/amt_minimiser),Qty_RoundOff))
+        random_qty = str(round((random_qty_int),Qty_RoundOff))
         random_price = round((random.uniform(arg1_Price_int,arg2_Price_int)),Price_RoundOff)
         random_price_str = str(random_price)
         Order_placement = FireOrder_Limit(client_id,client_secret,market_name,1,random_qty,random_price_str)
