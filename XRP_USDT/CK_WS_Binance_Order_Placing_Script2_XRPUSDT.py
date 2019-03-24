@@ -26,7 +26,7 @@ client_secret= "Enter Key"              # Cryptokart User Client Secret
 Binance_Api_key = "Binance API Key"                                # Binance API Key
 Binance_Api_Secret = "Binance Secret key "                         # Binance Secret Key
 
-market_name = "BTCUSDT"                                            # Market Name in which trade will occur
+market_name = "XRPUSDT"                                            # Market Name in which trade will occur
 
 CK_url = "https://cryptokart.io:1337/"                        # Change this URL to go from Staging to Production
 

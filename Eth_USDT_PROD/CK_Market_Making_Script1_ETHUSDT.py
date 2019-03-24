@@ -25,9 +25,9 @@ client = Client("Binance API key","Binance Secret Key")    #No need to provide k
 #Note change prices[11]['symbol']== 'BTCUSDT' this to get price of different markets {11,"BTCUSDT"}
 def Market_Price_Binance():
     prices = client.get_all_tickers()
-    if(prices[11]['symbol']== 'BTCUSDT'):                    #Change this to get different LTP for diff market
-        LTP_Binance = float(prices[11]['price'])
-        print("Market price of BTCUSDT -> ", LTP_Binance)
+    if(prices[12]['symbol']== 'ETHUSDT'):                    #Change this to get different LTP for diff market
+        LTP_Binance = float(prices[12]['price'])
+        print("Market price of ETHUSDT -> ", LTP_Binance)
         return LTP_Binance
 LTP = Market_Price_Binance()                                       #This value is used in variable Price regulator
 
@@ -40,7 +40,7 @@ client_id = "Insert API KEY"         # Provide API client ID to access the data
 client_secret= "Insert Secret KEY"      # Provide API client secret key to access the data
 price_regulator = (LTP *1)/100                             # Take 1% price of Market Price to regulate the spread
 price_regulator2 =(LTP *3)/100                             # Take 3% price of Market Price to regulate the spread
-market_name = "BTCUSDT"                                    # Enter the Market Name you want to trade in 
+market_name = "ETHUSDT"                                    # Enter the Market Name you want to trade in 
 user_id = "Enter User ID"                                               # This is id of the user whose client_ID and secret is used
 CK_url = "https://cryptokart.io:1337/"                # Change this URL to go from Staging to Production
 
@@ -52,8 +52,8 @@ CK_url = "https://cryptokart.io:1337/"                # Change this URL to go fr
 # A random integer will be taken b/w lower bound and upper bound and then it is divided with amt_minimiser
 #Example for the range of LB and UB -> 2and 20 and amt_minimizer 400 
 # the range will be 2/400 and 20/400 -> 0.005 and 0.05[Amount will be between these two]
-lower_bound_amt = 0.009
-upper_bound_amt = 0.028
+lower_bound_amt = 0.145
+upper_bound_amt = 0.435
 
 
 # Quantity Round OFF integer
