@@ -20,15 +20,15 @@ from binance.enums import *
 #Variable Declaration
 
 timestamp = (round(time.time()/1000))
-client_id = "Enter KEy"                                            # Cryptokart User Client ID
-client_secret= "Enter Key"              # Cryptokart User Client Secret 
+client_id = "enter client id"                     # Cryptokart iser client id
+client_secret= "enter client secret"            # Cryptokart User Client Secret 
 
 Binance_Api_key = "Binance API Key"                                # Binance API Key
 Binance_Api_Secret = "Binance Secret key "                         # Binance Secret Key
 
 market_name = "BTCUSDT"                                            # Market Name in which trade will occur
 
-CK_url = "https://cryptokart.io:1337/"                        # Change this URL to go from Staging to Production
+CK_url = "https://test.cryptokart.io:1337/"                        # Change this URL to go from Staging to Production
 
 Admin_Url_API_Call = "http://13.127.78.141:8080"                   # This Url is with extra privilige to get user id of other user
 
@@ -117,12 +117,12 @@ def Binance_Market_order_Sell(market_name,qty):
 # Upcoming two commands will create connection with websocket
 from websocket import create_connection
 ws = create_connection(Websocket_Url)
-print(ws)
 
 # Sending Cliend ID and Client Secret to verify the credentials to access Private Data
 ws.send(json.dumps({"id":1,"method":'server.sign',"params":[client_id,client_secret,timestamp]}))
-dict = {}
-
+result = (ws.recv())
+a = (json.loads(result))
+print(a)    
 
 # This will keep on running and getting the response from websocket
 while(True):
@@ -165,18 +165,19 @@ while(True):
             
             # checking len of order deals, because if order get cancelled without a single fill , The list should be empty
             if(len(order_deals) == 0):
-                print("\n \n NOTE: ORDER GET CANCELLED WITH ANY FILL , SAD IS'NT IT")
+                print("\n \n NOTE: ORDER GET CANCELLED WITHOUT ANY FILL , SAD IS'NT IT")
             else:
                 deal_order_id = order_deals[0]['deal_order_id']
                 price =order_deals[0]['price']
                 amount = order_deals[0]['amount']
                 res = order_finished_detail_postman(client_id,client_secret,id)
+                deal_stock = res['deal_stock']
+                amount_deal = res['amount']
                 ftime = res['ftime']                                               # ftime = Finished Time
                 time = order_deals[0]['time']
                 
-                # It will check whether the ftime == time , so that it can able to figure out whether order get cancelled or filled completely
-    
-                if(ftime == time):
+                # If amount and deal_stock will same then only order is finished otherwise cancelled
+                if(amount_deal == deal_stock):
                     check_user = order_finished_extra_access(deal_order_id)
                     if(check_user['user'] == Bot_ID_Filler):                     # Checking whther User is bot or Real
                         print("\n \n \t NOTE : ORDER GET FINISHED BY OUR OWN BOT, FOUND THE VICTIM!!",price,amount)
@@ -184,16 +185,24 @@ while(True):
                         print("\n \n \t ORDER GET FINISHED BY SOME REAL USER, TIME TO MAKE MONEY!!",price ,amount)
                         if((check_user['side'])==1):
                             Binance_Market_order_Sell(market_name,amount)
-                        elif(check_user('side')== 2):
+                        elif((check_user['side'])== 2):
                             Binance_Market_order_Buy(market_name,amount)
                         else:
                             print("Emergency !! Call the code creator asap, because it can't print in any case")
+                    
                 else:
                     print("\n \n \t ORDER GET CANCELLED AFTER SOME FILLING HAS BEEN DONE")
-                    
+
+                        
         else:
             print("Breathe IN Breathe  OUT.. order place hua hai bss")
                         
             
 ws.close()
+
+
+# In[ ]:
+
+
+
 
