@@ -4,17 +4,26 @@
 # In[1]:
 
 
+#!/usr/bin/env python
+# coding: utf-8
+
+# In[1]:
+
+
 # Importing required Libraries
 import requests
 import random
 import json
 import time
+import sys
 
 from binance.client import Client
 from binance.enums import *
 
 
 # In[2]:
+
+
 
 
 #This function is provided with python-binance in order to get data you have to pass Keys here
@@ -25,9 +34,9 @@ client = Client("Binance API key","Binance Secret Key")    #No need to provide k
 #Note change prices[11]['symbol']== 'BTCUSDT' this to get price of different markets {11,"BTCUSDT"}
 def Market_Price_Binance():
     prices = client.get_all_tickers()
-    if(prices[12]['symbol']== 'ETHUSDT'):                    #Change this to get different LTP for diff market
-        LTP_Binance = float(prices[12]['price'])
-        print("Market price of ETHUSDT -> ", LTP_Binance)
+    if(prices[11]['symbol']== 'BTCUSDT'):                    #Change this to get different LTP for diff market
+        LTP_Binance = float(prices[11]['price'])
+        print("Market price of BTCUSDT -> ", LTP_Binance)
         return LTP_Binance
 LTP = Market_Price_Binance()                                       #This value is used in variable Price regulator
 
@@ -35,25 +44,26 @@ LTP = Market_Price_Binance()                                       #This value i
 # In[3]:
 
 
+
 #Variable Declaration
-client_id = "Insert API KEY"         # Provide API client ID to access the data
-client_secret= "Insert Secret KEY"      # Provide API client secret key to access the data
-price_regulator = (LTP *1)/100                             # Take 1% price of Market Price to regulate the spread
-price_regulator2 =(LTP *3)/100                             # Take 3% price of Market Price to regulate the spread
-market_name = "ETHUSDT"                                    # Enter the Market Name you want to trade in 
-user_id = "Enter User ID"                                               # This is id of the user whose client_ID and secret is used
-CK_url = "https://cryptokart.io:1337/"                # Change this URL to go from Staging to Production
+client_id = ""    
+client_secret= ""     # Provide API client secret key to access the data
+price_regulator = (LTP *(.1))/100                             # Take 1% price of Market Price to regulate the spread
+price_regulator2 =(LTP *(.3))/100                             # Take 3% price of Market Price to regulate the spread
+market_name = "BTCUSDT"                                    # Enter the Market Name you want to trade in
+user_id = 75                                              # This is id of the user whose client_ID and secret is used
+CK_url = "https://test.cryptokart.io:1337/"                # Change this URL to go from Staging to Production
 
 
-# In[4]:
+# In[ ]:
 
 
 # Amount Generator variables
 # A random integer will be taken b/w lower bound and upper bound and then it is divided with amt_minimiser
-#Example for the range of LB and UB -> 2and 20 and amt_minimizer 400 
+#Example for the range of LB and UB -> 2and 20 and amt_minimizer 400
 # the range will be 2/400 and 20/400 -> 0.005 and 0.05[Amount will be between these two]
-lower_bound_amt = 0.145
-upper_bound_amt = 0.435
+lower_bound_amt = 0.003
+upper_bound_amt = 0.212
 
 
 # Quantity Round OFF integer
@@ -68,8 +78,12 @@ bulk_order_qty = 10
 # Order qty for regular interval
 reg_ord_qty = 1
 
-# If order get sudden wiped off qty
-sudd_ord_qty = 4
+# If order get sudden wiped off qty, this is replaced by more dynamic thing refer line 223
+# sudd_ord_qty = 4
+
+
+# Minimum order we required in a order book
+min_order_length = 20
 
 #Time Quantum for time.sleep() to delay b/w two orders
 def time_quantum_delay():
@@ -126,16 +140,16 @@ def Pending_Orders_User(client_id,client_secret,market_name,user_id):
         "limit" : 100,
         "user_id": user_id
     })
-    
+
     headers = {
         'Content-Type': "application/json",
         'cache-control': "no-cache"
         }
     response = requests.request("POST", url, data=json.dumps(payload), headers=headers)
-    
+
     # From here the function is modified to get Number of orders and Random Order ID
     No_of_orders = (len(response.json()['result']['records']))
-    random_order_number = (random.randint(0,No_of_orders))-1 
+    random_order_number = (random.randint(0,No_of_orders))-1
     random_order_id = ((response.json()['result']['records'][random_order_number]['id']))
     print(random_order_id)
     return random_order_id,No_of_orders
@@ -160,7 +174,7 @@ def Cancel_Order(client_id,client_secret,market_name,order_id):
     response = requests.request("POST", url, data=json.dumps(payload), headers=headers)
 
     print(response.text,"\n \n \t WARNING : THIS ORDER HAS BEEN CANCELLED " , order_id)
-    
+
 
 
 # In[ ]:
@@ -175,8 +189,8 @@ def Bulk_Buy_Order(No_of_Orders,arg1_qty_int,arg2_qty_int,arg1_Price_int,arg2_Pr
         random_price = round((random.uniform(arg1_Price_int,arg2_Price_int)),Price_RoundOff)
         random_price_str = str(random_price)
         Order_placement = FireOrder_Limit(client_id,client_secret,market_name,2,random_qty,random_price_str)
-   
-        
+
+
 def Bulk_Sell_Order(No_of_Orders,arg1_qty_int,arg2_qty_int,arg1_Price_int,arg2_Price_int,market_name):
     for i in range(No_of_Orders):
         random_qty_int = random.uniform(arg1_qty_int,arg2_qty_int)
@@ -184,10 +198,10 @@ def Bulk_Sell_Order(No_of_Orders,arg1_qty_int,arg2_qty_int,arg1_Price_int,arg2_P
         random_price = round((random.uniform(arg1_Price_int,arg2_Price_int)),Price_RoundOff)
         random_price_str = str(random_price)
         Order_placement = FireOrder_Limit(client_id,client_secret,market_name,1,random_qty,random_price_str)
-   
 
 
-LTP = Market_Price_Binance()                                      # Will store LTP from Binance 
+
+LTP = Market_Price_Binance()                                      # Will store LTP from Binance
 Bulk_Buy_Order(bulk_order_qty,lower_bound_amt,upper_bound_amt,LTP-price_regulator2,LTP-price_regulator,market_name)
 print("\n \n \t BULK BUY ORDERS HAS BEEN PLACED \n \n")
 Bulk_Sell_Order(bulk_order_qty,lower_bound_amt,upper_bound_amt,LTP+price_regulator,LTP + price_regulator2,market_name)
@@ -203,22 +217,26 @@ def Trade_Order_Limit():
     while(True):
         try:
             Order_len = Pending_Orders_User(client_id,client_secret,market_name,user_id)[1]
-            if(Order_len >10):
-                LTP = Market_Price_Binance()                          # Will store LTP from Binance 
+            if(Order_len > min_order_length):
+                LTP = Market_Price_Binance()                          # Will store LTP from Binance
 
                 order_id = Pending_Orders_User(client_id,client_secret,market_name,user_id)[0]    # Random Order ID generated
                 Cancel_Order(client_id,client_secret,market_name,order_id)
                 Bulk_Buy_Order(reg_ord_qty,lower_bound_amt,upper_bound_amt,LTP-price_regulator2,LTP-price_regulator,market_name)
                 time_quantum_delay()
-                
+
                 order_id = Pending_Orders_User(client_id,client_secret,market_name,user_id)[0]
                 Cancel_Order(client_id,client_secret,market_name,order_id)
-                Bulk_Sell_Order(reg_ord_qty,lower_bound_amt,upper_bound_amt,LTP+price_regulator,LTP + price_regulator2,market_name)              
+                Bulk_Sell_Order(reg_ord_qty,lower_bound_amt,upper_bound_amt,LTP+price_regulator,LTP + price_regulator2,market_name)
                 time_quantum_delay()
             else:
                 print(Order_len)
-                Bulk_Buy_Order(sudd_ord_qty,lower_bound_amt,upper_bound_amt,LTP-price_regulator2,LTP-price_regulator,market_name)
-                Bulk_Sell_Order(sudd_ord_qty,lower_bound_amt,upper_bound_amt,LTP+price_regulator,LTP + price_regulator2,market_name)               
+                LTP = Market_Price_Binance()                          # Will store LTP from Binance
+                value = min_order_length - Order_len
+                value = (int(value/2)) + 1
+                for i in range(value):
+                        Bulk_Buy_Order(1,lower_bound_amt,upper_bound_amt,LTP-price_regulator2,LTP-price_regulator,market_name)
+                        Bulk_Sell_Order(1,lower_bound_amt,upper_bound_amt,LTP+price_regulator,LTP + price_regulator2,market_name)
         except KeyboardInterrupt:
 #             CancelAllOrders(client_id,client_secret)
             print ("May the force with you")
